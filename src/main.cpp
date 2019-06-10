@@ -8,7 +8,6 @@ void smartDelay(uint16_t ms){
   } while (millis() - start < ms);
 }
 void setup(void) {
-  //u8g2.begin();
   oled.begin(&Adafruit128x64, I2C_ADDRESS);
   Serial.begin(GPSBaud);
   pinMode(Pin_SW, INPUT_PULLUP);
@@ -18,9 +17,9 @@ void setup(void) {
 }
 void loop(void) {
   smartDelay(1000);
-  
+
   print_date(gps);
-  
+
   }
 static void print_date(TinyGPS &gps)
 {
@@ -28,23 +27,26 @@ static void print_date(TinyGPS &gps)
   byte month, day, hour, minute, second, hundredths;
   unsigned long age;
   gps.crack_datetime(&year, &month, &day, &hour, &minute, &second, &hundredths, &age);
+  oled.clear();
   if (age == TinyGPS::GPS_INVALID_AGE)
     oled.println("****");
   else
   {
     String s;
-    uint8_t sat = (uint8_t)gps.satellites();
-    uint16_t alt = (uint16_t)gps.f_altitude();
+    //int sat = gps.satellites();
+    //float alt = (float)gps.f_altitude();
     //char sz[20];
     //sprintf(sz, "%02d:%02d  %ld  %f", hour, minute, sat,  alt);
-    s= hour + ":" + minute + ' ' + sat +' ' +  alt;
-    //oled.clear();
+    s= (String)hour + ":" + (String)minute ;//+ "  " + (String)sat + "  " +  (String)alt;
+
   //oled.setFont(fixednums15x31);
     oled.setFont(fixednums8x16);
     oled.setCursor(0,12);
     oled.println(s);
     oled.setFont(fixednums15x31);
-    oled.println(gps.f_speed_kmph());
+    float speed=gps.f_speed_kmph();
+    if(speed<1.5) speed = 0.0;
+    oled.println(speed,1);
     oled.setFont(fixednums8x16);
     oled.println(readVcc());
   }
